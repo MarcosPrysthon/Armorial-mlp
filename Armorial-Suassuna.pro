@@ -42,6 +42,7 @@ SOURCES += \
     entity/coachview/soccerview/soccerview.cpp \
     entity/coachview/soccerview/util/field.cpp \
     entity/entity.cpp \
+    entity/getinfo/getinfo.cpp \
     entity/player/behaviour/basics/behaviour_goalkeeper.cpp \
     entity/player/behaviour/basics/behaviour_markball.cpp \
     entity/player/behaviour/basics/behaviour_penalty_cf.cpp \
@@ -153,6 +154,7 @@ HEADERS += \
     entity/coachview/soccerview/util/timer.h \
     entity/coachview/soccerview/util/util.h \
     entity/entity.h \
+    entity/getinfo/getinfo.h \
     entity/player/navigation/fpp/fastpathplanning.h \
     entity/player/navigation/navalgorithm.h \
     entity/player/navigation/navigation.h \

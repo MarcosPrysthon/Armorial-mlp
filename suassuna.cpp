@@ -92,6 +92,7 @@ bool Suassuna::start() {
     _ourGUI->setCoach(_coach);
     _ourGUI->setReferee(_ref);
     _world->addEntity(_ourGUI, 3);
+
 /*
     // Setup ball prediction
     _ballPred = new BallPrediction();
@@ -99,8 +100,14 @@ bool Suassuna::start() {
     _ballPred->setMinDataSize(50);
     _ballPred->setMinVelocity(0.3);
     _world->addEntity(_ballPred, 2);
+
 */
     FreeAngles::initialize(_ourTeam, _theirTeam);
+
+    //Setup getInfo
+    _getInfo = new getInfo();
+    _getInfo->setTeams(_ourTeam , _theirTeam);
+    _world->addEntity(_getInfo , 2);
 
     // Start world
     _world->start();
