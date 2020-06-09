@@ -147,6 +147,7 @@ void getInfo::fillInfo(){
     playerMutex.unlock();
 
     //std::cout << inputLine << std::endl;
+    std::cout << "chamada pela entity MLPGUI" << std::endl;
 }
 
 std::string getInfo::makeInputLine(){
@@ -224,7 +225,8 @@ void getInfo::initialization(){
 }
 
 void getInfo::loop(){
-    //condicao (provisoria) a ser atendida para captar as informacoes
+    //AJEITAR CONEXÃO ENTRE GUI E GETINFO ***
+   /* //condicao (provisoria) a ser atendida para captar as informacoes
     teamMutex.lock();
     if(_ourTeam->hasBallPossession()){
 
@@ -248,7 +250,7 @@ void getInfo::loop(){
         //captando informacoes
         fillInfo();
     }
-    teamMutex.unlock();
+    teamMutex.unlock();*/
 
 }
 

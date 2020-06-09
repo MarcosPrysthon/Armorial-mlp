@@ -25,7 +25,7 @@
 #include <QMutex>
 class Entity : public QThread {
 public:
-    enum EntityType {ENT_WORLD, ENT_PLAYER, ENT_CONTROLMODULE, ENT_SENSOR, ENT_REFEREE, ENT_GUI, ENT_GRSIMULATOR, ENT_BALLPREDICTION, ENT_GETINFO};
+    enum EntityType {ENT_WORLD, ENT_PLAYER, ENT_CONTROLMODULE, ENT_SENSOR, ENT_REFEREE, ENT_GUI, ENT_GRSIMULATOR, ENT_BALLPREDICTION, ENT_GETINFO, ENT_MLPGUI};
     Entity(EntityType type);
     int entityId() const { return _id; }
     EntityType entityType() const { return _type; }
