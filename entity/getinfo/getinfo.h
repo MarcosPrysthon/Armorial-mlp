@@ -24,14 +24,14 @@ public:
 
     void setTeams(MRCTeam *ourTeam , MRCTeam *theirTeam);
 
+    //funcao chamada para captar informacoes, atualizar informacoes dos jogadores e gerar inputLine
+    void fillInfo();
+
 private:
     //armazenam informacoes dos jogadores em campo
     playerInfo kicker, allyGoalie, oppGoalie;
     playerInfo *ally;
     playerInfo *opp;
-
-    //funcao chamada para captar informacoes, atualizar informacoes dos jogadores e gerar inputLine
-    void fillInfo();
 
     //funcao usada para ordenar vetores de aliados e oponentes segundo a distToKicker
     void teamSort(playerInfo *team, int qtTeam);

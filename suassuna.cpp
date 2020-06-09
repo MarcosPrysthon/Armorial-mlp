@@ -109,6 +109,11 @@ bool Suassuna::start() {
     _getInfo->setTeams(_ourTeam , _theirTeam);
     _world->addEntity(_getInfo , 2);
 
+    //Setup MlpGUI
+    _mlpGUI = new MlpGui();
+    _mlpGUI->_infoModule = _getInfo;
+    _world->addEntity(_mlpGUI, 3);
+
     // Start world
     _world->start();
 

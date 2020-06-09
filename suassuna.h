@@ -43,6 +43,8 @@
 
 #include <entity/getinfo/getinfo.h>
 
+#include <entity/mlpgui/mlpgui.h>
+
 class Suassuna
 {
 public:
@@ -86,5 +88,6 @@ private:
 
     // GUI
     CoachView *_ourGUI;
+    MlpGui *_mlpGUI;
 };
 #endif // SUASSUNA_H
