@@ -31,7 +31,7 @@ void getInfo::Kicker(){
                 kicker.id = PlayerBus::ourPlayer(id)->playerId();
                 kicker.position = PlayerBus::ourPlayer(id)->position();
                 kicker.orientation = PlayerBus::ourPlayer(id)->orientation();
-                std::cout << "[GETINFO] KICKER " << kicker.position.x() << " - " << kicker.position.y() <<std::endl; // printa as posiçoes x e y do kicker
+                //std::cout << "[GETINFO] KICKER " << kicker.position.x() << " - " << kicker.position.y() <<std::endl; // printa as posiçoes x e y do kicker
             }
         }
     }
@@ -62,7 +62,7 @@ void getInfo::OppGoalie(){
 
     if(oppGoalie.valid){    //verifica se foi encontrado o oppGoalie
         // printa as posiçoes x e y do oppgoalie
-        std::cout << "[GETINFO] OPPGOALIE " << oppGoalie.position.x() << " - " << oppGoalie.position.y() <<std::endl;
+        //std::cout << "[GETINFO] OPPGOALIE READY" << std::endl;
     }else{
         oppGoalie.valid = false;
     }
@@ -89,7 +89,7 @@ void getInfo::AllyGoalie(){
 
     if(allyGoalie.valid){    //verifica se foi encontrado o allyGoalie
         // printa as posiçoes x e y do allygoalie
-        std::cout << "[GETINFO] ALLYGOALIE " << allyGoalie.position.x() << " - " << allyGoalie.position.y() <<std::endl;
+        //std::cout << "[GETINFO] ALLYGOALIE READY" << std::endl;
     }else{
         allyGoalie.valid = false;
     }
@@ -109,7 +109,7 @@ void getInfo::Ally(){
             qtAlly++;
         }
     }
-    std::cout << "[GETINFO] ALLY READY" << std::endl;
+    //std::cout << "[GETINFO] ALLY READY" << std::endl;
 }
 
 void getInfo::Opp(){
@@ -126,13 +126,31 @@ void getInfo::Opp(){
             qtOpp++;
         }
     }
-    std::cout << "[GETINFO] OPP READY" << std::endl;
+    //std::cout << "[GETINFO] OPP READY" << std::endl;
 }
 
 void getInfo::fillInfo(){
-    std::string inputLine;
+    //std::cout << std::endl;
 
     playerMutex.lock();
+
+    //inicializando variaveis
+    qtAlly = 0;
+    qtOpp = 0;
+    inputLine.clear();
+    //inicializando informacoes dos jogadores com valores default
+    kicker.valid = false;
+    kicker.id = 99;
+    kicker.position.setPosition(0, 0, 0);
+    kicker.orientation.setValue(0);
+    allyGoalie = kicker;
+    oppGoalie = kicker;
+    for(int i = 0; i < MRCConstants::_qtPlayers - 1; i++){
+        opp[i] = kicker;
+        if(i < MRCConstants::_qtPlayers - 2){
+            ally[i] = kicker;
+        }
+    }
     //captando informacoes dos jogadores em campo
     Kicker();
     OppGoalie();
@@ -141,23 +159,21 @@ void getInfo::fillInfo(){
     Ally();
     teamSort(ally, qtAlly);
     teamSort(opp, qtOpp);
+    fixInfo();
     //formando linha de entradas com as informacoes captadas
-    inputLine = makeInputLine();
-    std::cout << std::endl;
-    playerMutex.unlock();
+    makeInputLine();
+    //std::cout << std::endl;
 
-    //std::cout << inputLine << std::endl;
-    std::cout << "chamada pela entity MLPGUI" << std::endl;
+    playerMutex.unlock();
 }
 
-std::string getInfo::makeInputLine(){
+void getInfo::makeInputLine(){
 /*
  * ordem das entradas:
  * dados do kicker, dados do ally0, dados do opp0, dados do oppGoalie,
  * dados do ally1, dados do ally2, dados do ally3, dados do allyGoalie,
  * dados do opp1, dados do opp2, dados do opp3, dados do opp4;
 */
-    std::string inputLine;
     //kicker
     inputLine += std::to_string(kicker.position.x()) + " " + std::to_string(kicker.position.y()) + " " + std::to_string(kicker.orientation.value()) + " ";
     //ally0
@@ -183,8 +199,19 @@ std::string getInfo::makeInputLine(){
     //opp4
     inputLine += std::to_string(opp[4].position.x()) + " " + std::to_string(opp[4].position.y()) + " " + std::to_string(opp[4].orientation.value()) + " ";
 
-    std::cout << "[GETINFO] INPUT LINE READY" << std::endl;
-    return inputLine;
+    //std::cout << "[GETINFO] INPUT LINE READY" << std::endl;
+}
+
+void getInfo::writeOnDataset(std::string output){
+    playerMutex.lock();
+    if(kicker.valid){
+        string datasetLine = inputLine + output;
+        dataset << datasetLine;
+        std::cout << "[GETINFO] line written" << std::endl;
+    }else{
+        std::cout << "[GETINFO] line discarded: our team hasn't ball possession" << std::endl;
+    }
+    playerMutex.unlock();
 }
 
 void getInfo::teamSort(playerInfo *team, int qtTeam){
@@ -207,7 +234,56 @@ void getInfo::teamSort(playerInfo *team, int qtTeam){
     }
 }
 
+playerInfo getInfo::calc(playerInfo player){
+    float x, y, z, pi = 3.141593;
+
+    x = player.position.x();
+    y = player.position.y();
+    z = player.position.z();
+    player.position.setPosition(-1*x, -1*y, z);
+    player.orientation.setValue(player.orientation.value() - pi);
+    if(player.orientation.value() < 0){
+        player.orientation.setValue(2*pi + player.orientation.value());
+    }
+
+    return player;
+}
+
+void getInfo::fixInfo(){
+    /*
+     * O objetivo eh gerar um dataset com situacoes de passe e chute a gol
+     * que tenham ocorrido em regioes espaciais similares
+     * para facilitar o treinamento da MLP.
+     * Por isso, consideramos que todas as situacoes aconteceram em jogadas
+     * de ataque de times que sao sempre o time da esquerda (e atacam o time da direita).
+     * (para isso, "convertemos" as coordenadas e orientacoes como se o time fosse o time da esquerda)
+    */
+    if(_ourTeam->fieldSide().isRight()){
+        //kicker
+        kicker = calc(kicker);
+        //oppGoalie
+        oppGoalie = calc(oppGoalie);
+        //allyGoalie
+        allyGoalie = calc(allyGoalie);
+        //ally vector
+        for(int i=0; i<qtAlly; i++){
+            ally[i] = calc(ally[i]);
+        }
+        //opp vector
+        for(int i=0; i<qtOpp; i++){
+            opp[i] = calc(opp[i]);
+        }
+    }
+
+}
+
 void getInfo::initialization(){
+
+    //abrindo arquivo dataset
+    dataset.open("dataset.txt", std::fstream::out | std::fstream::app);
+    if(!dataset.is_open()){
+        std::cout << "[GETINFO] Erro ao abrir arquivo" << std::endl;
+    }
 
     //alocar vetor para guardar informacoes dos jogadores aliados (exceto kicker e goleiro)
     ally = static_cast<playerInfo*>(malloc((MRCConstants::_qtPlayers - 2)*(sizeof(playerInfo))));
@@ -225,36 +301,11 @@ void getInfo::initialization(){
 }
 
 void getInfo::loop(){
-    //AJEITAR CONEXÃO ENTRE GUI E GETINFO ***
-   /* //condicao (provisoria) a ser atendida para captar as informacoes
-    teamMutex.lock();
-    if(_ourTeam->hasBallPossession()){
-
-        //inicializando variaveis
-        qtAlly = 0;
-        qtOpp = 0;
-        //inicializando informacoes dos jogadores com valores default
-        kicker.valid = false;
-        kicker.id = 99;
-        kicker.position.setPosition(0, 0, 0);
-        kicker.orientation.setValue(0);
-        allyGoalie = kicker;
-        oppGoalie = kicker;
-        for(int i = 0; i < MRCConstants::_qtPlayers - 1; i++){
-            opp[i] = kicker;
-            if(i < MRCConstants::_qtPlayers - 2){
-                ally[i] = kicker;
-            }
-        }
-
-        //captando informacoes
-        fillInfo();
-    }
-    teamMutex.unlock();*/
-
+    fillInfo();
 }
 
 void getInfo::finalization(){
+    dataset.close();
     free(ally);
     free(opp);
     std::cout << "[GETINFO] Entity Stopped\n";

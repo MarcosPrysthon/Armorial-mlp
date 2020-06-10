@@ -25,13 +25,13 @@ void MlpGui::loop(){
     kickBtnClicked = _mlpGUI->kickBtnClicked;
 
     if(passBtnClicked){
-        _infoModule->fillInfo();
+        _infoModule->writeOnDataset("0 1\n");
         _mlpGUI->resetVars();
-        std::cout << "debugando" << std::endl;
+        //std::cout << "debugando" << std::endl;
     } else if(kickBtnClicked){
-        _infoModule->fillInfo();
+        _infoModule->writeOnDataset("1 0\n");
         _mlpGUI->resetVars();
-        std::cout << "debugando" << std::endl;
+        //std::cout << "debugando" << std::endl;
     }
 
     mutex.unlock();
