@@ -160,8 +160,6 @@ void getInfo::fillInfo(){
     teamSort(ally, qtAlly);
     teamSort(opp, qtOpp);
     fixInfo();
-    //formando linha de entradas com as informacoes captadas
-    makeInputLine();
     //std::cout << std::endl;
 
     playerMutex.unlock();
@@ -205,6 +203,7 @@ void getInfo::makeInputLine(){
 void getInfo::writeOnDataset(std::string output){
     playerMutex.lock();
     if(kicker.valid){
+        makeInputLine();
         string datasetLine = inputLine + output;
         dataset << datasetLine;
         std::cout << "[GETINFO] line written" << std::endl;
