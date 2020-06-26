@@ -37,6 +37,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     const/constants.cpp \
+    const/mlp.cpp \
     entity/ballprediction/ballprediction.cpp \
     entity/coachview/soccerview/gltext.cpp \
     entity/coachview/soccerview/soccerview.cpp \
@@ -145,6 +146,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     const/constants.h \
+    const/mlp.h \
     entity/ballprediction/ballprediction.h \
     entity/baseentity.h \
     entity/coachview/soccerview/gltext.h \
@@ -269,4 +271,11 @@ RESOURCES += \
     rsc.qrc
 
 DISTFILES += \
-    constraints/agressivity_clusters.json
+    const/parameters \
+    const/results \
+    const/testdataset \
+    const/traindataset \
+    constraints/agressivity_clusters.json \
+    entity/player/lalala/parameters \
+    entity/player/lalala/results \
+    entity/player/lalala/testdataset
