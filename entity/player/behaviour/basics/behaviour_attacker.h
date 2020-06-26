@@ -25,6 +25,9 @@
 #include <entity/player/behaviour/behaviour.h>
 #include <entity/player/skills/skills_include.h>
 #include <utils/mrctimer/mrctimer.h>
+#include <entity/contromodule/mrcteam.h>
+#include <utils/utils.hh>
+#include <const/mlp.h>
 #include <QObject>
 
 class Behaviour_Attacker : public Behaviour {
@@ -43,7 +46,12 @@ private:
 
     Position getBestKickPosition();
     bool isBehindBall(Position posObjective);
-    quint8 getBestReceiver();
+    quint8 getBestReceiver();   
+
+    float* neededPlayers = NULL;
+    void getNeededPlayers();
+    MRCTeam *ourTeam;
+    MRCTeam *theirTeam;
 
 public:
     Behaviour_Attacker();

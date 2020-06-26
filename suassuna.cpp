@@ -28,6 +28,7 @@
 #include <utils/freeangles/freeangles.h>
 #include <entity/player/navigation/navalgorithm.h>
 #include <entity/player/navigation/fpp/fastpathplanning.h>
+#include <const/mlp.h>
 
 Suassuna::Suassuna(quint8 teamId, Colors::Color teamColor, FieldSide fieldSide)
     : _teamId(teamId), _teamColor(teamColor), _fieldSide(fieldSide){
@@ -113,6 +114,9 @@ bool Suassuna::start() {
     _mlpGUI = new MlpGui();
     _mlpGUI->_infoModule = _getInfo;
     _world->addEntity(_mlpGUI, 3);
+
+    //Setup MLP params
+    MLP::loadParameters();
 
     // Start world
     _world->start();

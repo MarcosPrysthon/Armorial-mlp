@@ -102,14 +102,17 @@ void Behaviour_Attacker::run() {
         if(distToKickPosition < MAX_DIST_KICK && player()->distBall() < 0.3f && ans){
             _timer->update(); // reset timer
             _state = STATE_KICK;
-        }
+         }
     }
     break;
     case STATE_KICK:{
+        // mlp calling
+        float *mlpDecision = MLP::forward(neededPlayers);
+
         enableTransition(2);
         if(_bestReceiver != RECEIVER_INVALID_ID){
-            if(PlayerBus::ourPlayerAvailable(_bestReceiver)){
-                _kickPosition = PlayerBus::ourPlayer(_bestReceiver)->position(); // update to avoid delay
+            if(PlayerBus::ourPlayerAvailable(_bestReceiver) && mlpDecision[1] == 1.0){
+                _kickPosition = PlayerBus::ourPlayer(_bestReceiver)->position();// update to avoid delay
             }
         }
 
@@ -221,4 +224,69 @@ Position Behaviour_Attacker::getBestKickPosition(){
     }
 
     return impactPosition;
+}
+
+void Behaviour_Attacker::getNeededPlayers(){
+    float minorDist, dist;
+
+    Player *kicker, *ally, *op, *opGoalie;
+    ourTeam = player()->team();
+    theirTeam = player()->team()->opTeam();
+
+    QHash<quint8, Player *> allyPlayersList = ourTeam->avPlayers();
+    QHash<quint8, Player *> opPlayersList = ourTeam->avPlayers();
+
+    //pegando o jogador aliado com a posse de bola
+    for(int i = 0; i < allyPlayersList.size(); i++){
+        if(allyPlayersList[i]->hasBallPossession()){
+            kicker = allyPlayersList[i];
+        }
+    }
+
+    //aliado mais perto da bola
+    for(int i = 0; i < allyPlayersList.size(); i++){
+        minorDist = 9999.0;
+        dist = allyPlayersList[i]->distanceTo(kicker->position());
+        if(dist < minorDist && allyPlayersList[i]->playerId() != kicker->playerId()){
+            ally = allyPlayersList[i];
+            minorDist = dist;
+        }
+    }
+
+    //pegando o goleiro adversario
+    for(int i = 0; i < opPlayersList.size(); i++){
+        minorDist = 9999.0;
+        dist = opPlayersList[i]->distOurGoal();
+        if(dist < minorDist){
+            opGoalie = opPlayersList[i];
+            minorDist = dist;
+        }
+    }
+
+    //adversario mais perto da bola
+    for(int i = 0; i < opPlayersList.size(); i++){
+        minorDist = 9999.0;
+        dist = opPlayersList[i]->distanceTo(kicker->position());
+        if(dist < minorDist){
+            op = opPlayersList[i];
+            minorDist = dist;
+        }
+    }
+
+    /*alocando array de dados dos 4 jogadores para a mlp
+     *ordem dos jogadores: kicker, ally, op, opGoalie
+     *ordem dos dados: pos.x, pos.y */
+    neededPlayers = new float[8];
+
+    neededPlayers[0] = kicker->position().x();
+    neededPlayers[1] = kicker->position().y();
+
+    neededPlayers[2] = ally->position().x();
+    neededPlayers[3] = ally->position().y();
+
+    neededPlayers[4] = op->position().x();
+    neededPlayers[5] = op->position().y();
+
+    neededPlayers[6] = opGoalie->position().x();
+    neededPlayers[7] = opGoalie->position().y();
 }
