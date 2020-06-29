@@ -32,6 +32,10 @@ void Role_Default::initializeBehaviours(){
     // Aqui são inseridos os behaviours possíveis de serem usados
     // na ordem: ID do behaviour, instanciação dele
     usesBehaviour(BHV_DONOTHING, _bh_dn = new Behaviour_DoNothing());
+
+    usesBehaviour(BHV_ATTACKER, _bh_at = new Behaviour_Attacker());
+
+    usesBehaviour(BHV_RECEIVER, _bh_rcv = new Behaviour_Receiver());
 }
 
 void Role_Default::configure(){
@@ -45,8 +49,13 @@ void Role_Default::run(){
      * na classe da role, sete-os aqui e envie para o behaviour (usando as funções
      * set presentes neles)
     */
-
     setBehaviour(BHV_DONOTHING);
-
+    /*
+    if(player()->hasBallPossession()){
+        setBehaviour(BHV_ATTACKER);
+    }else{
+        setBehaviour(BHV_RECEIVER);
+    }
+    */
 
 }

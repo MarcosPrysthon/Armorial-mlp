@@ -1,3 +1,4 @@
+#include "mlp.h"
 #include<iostream>
 #include<stdio.h>
 #include<stdlib.h>
@@ -6,7 +7,7 @@
 #include<time.h>
 #include<random>
 
-#include"const/mlp.h"
+//#include"const/mlp.h"
 
 using namespace std;
 
@@ -156,6 +157,7 @@ float* MLP::forward(float* inVector){
     }
 
     //Calcular resultados dos neuronios da camada output
+    bool foundOne = false;
     for(i=0;i<outputLength;i++){
         OutTotal = 0;
         for(j=0;j<hidLength;j++){
@@ -165,8 +167,9 @@ float* MLP::forward(float* inVector){
         outputResult[i] = funcActiv(OutTotal);
 
         //vetor a ser retornado
-        if(outputResult[i] >= lim){
+        if(outputResult[i] >= lim && !foundOne){
             output[i] = 1;
+            foundOne = true;
         }else if(outputResult[i] < (1-lim)){
             output[i] = 0;
         }else{
@@ -181,9 +184,9 @@ void MLP::backpropagation(float X[][inLength], float Y[][outputLength], int qtTr
     float erro, deltaO[outputLength], deltaH[hidLength];
     float entradas[inLength];
     double cycles = 0;
-    erroTotal = 2*0.01;
+    erroTotal = 2*mlpThreshold;
 
-    while(erroTotal > 0.01 && cycles < maxtraincycles){
+    while(erroTotal > mlpThreshold && cycles < maxtraincycles){
         cycles++;
 
         erroTotal = 0; //erro eh recalculado a cada processamento do dataset para treino do MLP

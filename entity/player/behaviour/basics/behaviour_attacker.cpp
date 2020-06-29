@@ -65,20 +65,42 @@ void Behaviour_Attacker::run() {
         _bestReceiver = RECEIVER_INVALID_ID;
         _kickPosition = loc()->ourGoal();
 
-        Position bestKickPosition = getBestKickPosition();
+        //Position bestKickPosition = getBestKickPosition(); //original
+
+        //mudanca p/ testemlp
+        Position oppGoal;
+        oppGoal.setPosition(-5.9, -0.2, 0);
+        Position bestKickPosition = player()->position();
+        //fim mudanca p/ testemlp
+
         if(!bestKickPosition.isUnknown()){ // checar isso dps
-            _kickPosition = bestKickPosition;
+
+            //mudanca p/ testemlp
+            _kickPosition = oppGoal;
+            cout << "[PUSH] FOUND BEST KICK POSITION" << endl;
+            //fim mudanca p/ testemlp
+
+            //_kickPosition = bestKickPosition; //original
         }else{
             // descobrindo o melhor receiver
             _mutex.lock();
 
             _bestReceiver = getBestReceiver();
             if(_bestReceiver != RECEIVER_INVALID_ID){
+
+                //mudanca p/ testemlp
+                cout << "[PUSH] FOUND BEST RECEIVER" << endl;
+                //fim mudanca p/ testemlp
+
                 Position receiverPosition = PlayerBus::ourPlayer(_bestReceiver)->position();
                 if(!receiverPosition.isUnknown()){
                     _kickPosition = receiverPosition;
                 }
+            //mudanca p/ testemlp
+            }else{
+                cout << "[PUSH] DIDN'T FIND BEST RECEIVER" << endl;
             }
+            //fim mudanca p/ testemlp
 
             _mutex.unlock();
         }
@@ -101,20 +123,36 @@ void Behaviour_Attacker::run() {
         float distToKickPosition = player()->distanceTo(_kickPosition);
         if(distToKickPosition < MAX_DIST_KICK && player()->distBall() < 0.3f && ans){
             _timer->update(); // reset timer
+
+            //mudanca p/ testemlp
+            cout << "[PUSH] GOING TO KICK!!!!!!" << endl;
+            //fim mudanca p/ testemlp
+
             _state = STATE_KICK;
-         }
+
+        //mudanca p/ testemlp
+        }else{            
+            cout << "[PUSH] CANT KICK!" << endl;
+        }
+        //fim mudanca p/ testemlp
     }
     break;
     case STATE_KICK:{
+        //finding mlp input
+        _mutex.lock();
+        getNeededPlayers();
         // mlp calling
         float *mlpDecision = MLP::forward(neededPlayers);
 
+        cout << "[MLP] " << mlpDecision[0] << " " << mlpDecision[1] << endl;
+
         enableTransition(2);
         if(_bestReceiver != RECEIVER_INVALID_ID){
-            if(PlayerBus::ourPlayerAvailable(_bestReceiver) && mlpDecision[1] == 1.0){
+            if(PlayerBus::ourPlayerAvailable(_bestReceiver) && mlpDecision[0] == 0.0 && mlpDecision[1] == 1.0){
                 _kickPosition = PlayerBus::ourPlayer(_bestReceiver)->position();// update to avoid delay
             }
         }
+        _mutex.unlock();
 
         // Enable kick
         if(player()->isLookingTo(_kickPosition, 0.015)){
@@ -229,54 +267,60 @@ Position Behaviour_Attacker::getBestKickPosition(){
 void Behaviour_Attacker::getNeededPlayers(){
     float minorDist, dist;
 
-    Player *kicker, *ally, *op, *opGoalie;
-    ourTeam = player()->team();
-    theirTeam = player()->team()->opTeam();
+    PlayerAccess *kicker, *ally, *op, *opGoalie;
+    //ourTeam = player()->team();
+    //theirTeam = player()->team()->opTeam();
 
-    QHash<quint8, Player *> allyPlayersList = ourTeam->avPlayers();
-    QHash<quint8, Player *> opPlayersList = ourTeam->avPlayers();
+    //QHash<quint8, Player *> allyPlayersList = ourTeam->avPlayers();
+    //QHash<quint8, Player *> opPlayersList = ourTeam->avPlayers();
 
     //pegando o jogador aliado com a posse de bola
-    for(int i = 0; i < allyPlayersList.size(); i++){
-        if(allyPlayersList[i]->hasBallPossession()){
-            kicker = allyPlayersList[i];
+    for(quint8 id = 0; id < MRCConstants::_qtPlayers; id++){
+        if(PlayerBus::ourPlayerAvailable(id)){  //verifica se o id é valido
+            if(PlayerBus::ourPlayer(id)->hasBallPossession()){
+                kicker = PlayerBus::ourPlayer(id);
+            }
         }
     }
 
+    minorDist = 9999.0;
     //aliado mais perto da bola
-    for(int i = 0; i < allyPlayersList.size(); i++){
-        minorDist = 9999.0;
-        dist = allyPlayersList[i]->distanceTo(kicker->position());
-        if(dist < minorDist && allyPlayersList[i]->playerId() != kicker->playerId()){
-            ally = allyPlayersList[i];
-            minorDist = dist;
+    for(quint8 id = 0; id < MRCConstants::_qtPlayers; id++){
+        if(PlayerBus::ourPlayerAvailable(id)){
+            dist = PlayerBus::ourPlayer(id)->distanceTo(kicker->position());
+            if(dist < minorDist && PlayerBus::ourPlayer(id)->playerId() != kicker->playerId()){
+                ally = PlayerBus::ourPlayer(id);
+                minorDist = dist;
+            }
         }
     }
-
+    minorDist = 9999.0;
     //pegando o goleiro adversario
-    for(int i = 0; i < opPlayersList.size(); i++){
-        minorDist = 9999.0;
-        dist = opPlayersList[i]->distOurGoal();
-        if(dist < minorDist){
-            opGoalie = opPlayersList[i];
-            minorDist = dist;
+    for(quint8 id = 0; id < MRCConstants::_qtPlayers; id++){
+        if(PlayerBus::theirPlayerAvailable(id)){
+            dist = PlayerBus::theirPlayer(id)->distOurGoal();
+            if(dist < minorDist){
+                opGoalie = PlayerBus::theirPlayer(id);
+                minorDist = dist;
+            }
         }
     }
 
+    minorDist = 9999.0;
     //adversario mais perto da bola
-    for(int i = 0; i < opPlayersList.size(); i++){
-        minorDist = 9999.0;
-        dist = opPlayersList[i]->distanceTo(kicker->position());
-        if(dist < minorDist){
-            op = opPlayersList[i];
-            minorDist = dist;
+    for(quint8 id = 0; id < MRCConstants::_qtPlayers; id++){
+        if(PlayerBus::theirPlayerAvailable(id) && id != opGoalie->playerId()){
+            dist = PlayerBus::theirPlayer(id)->distanceTo(kicker->position());
+            if(dist < minorDist){
+                op = PlayerBus::theirPlayer(id);
+                minorDist = dist;
+            }
         }
     }
 
     /*alocando array de dados dos 4 jogadores para a mlp
      *ordem dos jogadores: kicker, ally, op, opGoalie
      *ordem dos dados: pos.x, pos.y */
-    neededPlayers = new float[8];
 
     neededPlayers[0] = kicker->position().x();
     neededPlayers[1] = kicker->position().y();

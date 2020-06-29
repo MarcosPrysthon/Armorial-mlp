@@ -48,7 +48,7 @@ private:
     bool isBehindBall(Position posObjective);
     quint8 getBestReceiver();   
 
-    float* neededPlayers = NULL;
+    float neededPlayers[8];
     void getNeededPlayers();
     MRCTeam *ourTeam;
     MRCTeam *theirTeam;

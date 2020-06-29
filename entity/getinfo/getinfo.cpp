@@ -3,6 +3,7 @@
 #include <entity/player/player.h>
 #include <entity/player/playerbus.h>
 #include "const/constants.h"
+#include "const/mlp.h"
 #include <string>
 
 QString getInfo::name(){
@@ -160,6 +161,7 @@ void getInfo::fillInfo(){
     teamSort(ally, qtAlly);
     teamSort(opp, qtOpp);
     fixInfo();
+    if(kicker.valid) testMLP();
     //std::cout << std::endl;
 
     playerMutex.unlock();
@@ -276,10 +278,22 @@ void getInfo::fixInfo(){
 
 }
 
+void getInfo::testMLP(){
+    float inMlp[8] = {kicker.position.x(), kicker.position.y(), ally[0].position.x(), ally[0].position.y(),
+                     opp[0].position.x(), opp[0].position.y(), oppGoalie.position.x(), oppGoalie.position.y()};
+    float* mlpDecision;
+    mlpDecision = MLP::forward(inMlp);
+    cout << "[GETINFO MLP] ";
+    for(int i=0;i<outputLength;i++){
+        cout << mlpDecision[i] << " ";
+    }
+    cout << endl;
+}
+
 void getInfo::initialization(){
 
     //abrindo arquivo dataset
-    dataset.open("dataset.txt", std::fstream::out | std::fstream::app);
+    dataset.open(datasetPath, std::fstream::out | std::fstream::app);
     if(!dataset.is_open()){
         std::cout << "[GETINFO] Erro ao abrir arquivo" << std::endl;
     }

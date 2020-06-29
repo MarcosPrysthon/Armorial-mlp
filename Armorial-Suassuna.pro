@@ -271,6 +271,10 @@ RESOURCES += \
     rsc.qrc
 
 DISTFILES += \
+    const/mlpfiles/parameters \
+    const/mlpfiles/results \
+    const/mlpfiles/testdataset \
+    const/mlpfiles/traindataset \
     const/parameters \
     const/results \
     const/testdataset \

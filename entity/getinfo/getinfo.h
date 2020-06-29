@@ -6,6 +6,8 @@
 #include <entity/contromodule/mrcteam.h>
 #include <fstream>
 
+#define datasetPath "entity/getinfo/dataset.txt"
+
 class playerInfo{
 public:
     bool valid;
@@ -60,7 +62,7 @@ private:
     void initialization();
     void loop();
     void finalization();
-
+    void testMLP();
 
     MRCTeam *_ourTeam;
     MRCTeam *_theirTeam;

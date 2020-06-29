@@ -30,10 +30,14 @@ class Role_Default : public Role
 private:
     // Behaviours
     Behaviour_DoNothing *_bh_dn;
+    Behaviour_Attacker *_bh_at;
+    Behaviour_Receiver *_bh_rcv;
 
     // Behaviours ids!
     enum{
-        BHV_DONOTHING
+        BHV_DONOTHING,
+        BHV_ATTACKER,
+        BHV_RECEIVER
     };
 
     // Inherited functions

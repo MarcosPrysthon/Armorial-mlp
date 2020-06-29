@@ -1,5 +1,5 @@
-#ifndef MLP_HPP
-#define MLP_HPP
+#ifndef MLP_H
+#define MLP_H
 
 
 //DEFINES
@@ -7,13 +7,13 @@
 #define hidLength 24
 #define outputLength 2
 #define learningRate 0.1
-//#define threshold 0.01
-#define lim 0.9	//limite para considerar uma saída como classificada
+#define mlpThreshold 0.01
+#define lim 0.5	//limite para considerar uma saída como classificada
 #define maxtraincycles 10000
-#define resultsFile "const/results.txt"
-#define parametersFile "const/parameters.txt"
-#define trainFile "const/traindataset.txt"
-#define testFile "const/testdataset.txt"
+#define resultsFile "const/mlpfiles/results"
+#define parametersFile "const/mlpfiles/parameters"
+#define trainFile "const/mlpfiles/traindataset"
+#define testFile "const/mlpfiles/testdataset"
 
 #include <fstream>
 
