@@ -207,7 +207,17 @@ void getInfo::writeOnDataset(std::string output){
     if(kicker.valid){
         makeInputLine();
         string datasetLine = inputLine + output;
-        dataset << datasetLine;
+        //abrindo arquivo dataset
+        dataset.open(datasetPath, std::fstream::out | std::fstream::app);
+        if(!dataset.is_open()){
+            std::cout << "[GETINFO] Erro ao abrir arquivo" << std::endl;
+        }else{
+            //escrevendo linha
+            dataset << datasetLine;
+        }
+        dataset.close();
+        //fechando arquivo
+
         std::cout << "[GETINFO] line written" << std::endl;
     }else{
         std::cout << "[GETINFO] line discarded: our team hasn't ball possession" << std::endl;
@@ -279,8 +289,9 @@ void getInfo::fixInfo(){
 }
 
 void getInfo::testMLP(){
-    float inMlp[8] = {kicker.position.x(), kicker.position.y(), ally[0].position.x(), ally[0].position.y(),
-                     opp[0].position.x(), opp[0].position.y(), oppGoalie.position.x(), oppGoalie.position.y()};
+    float inMlp[inLength] = {kicker.position.x(), kicker.position.y(), ally[0].position.x(), ally[0].position.y(),
+                     opp[0].position.x(), opp[0].position.y(), oppGoalie.position.x(), oppGoalie.position.y(),
+                     ally[1].position.x(), ally[1].position.y(), opp[1].position.x(), opp[1].position.y()};
     float* mlpDecision;
     mlpDecision = MLP::forward(inMlp);
     cout << "[GETINFO MLP] ";
@@ -291,13 +302,6 @@ void getInfo::testMLP(){
 }
 
 void getInfo::initialization(){
-
-    //abrindo arquivo dataset
-    dataset.open(datasetPath, std::fstream::out | std::fstream::app);
-    if(!dataset.is_open()){
-        std::cout << "[GETINFO] Erro ao abrir arquivo" << std::endl;
-    }
-
     //alocar vetor para guardar informacoes dos jogadores aliados (exceto kicker e goleiro)
     ally = static_cast<playerInfo*>(malloc((MRCConstants::_qtPlayers - 2)*(sizeof(playerInfo))));
     if(ally == NULL){
@@ -318,7 +322,6 @@ void getInfo::loop(){
 }
 
 void getInfo::finalization(){
-    dataset.close();
     free(ally);
     free(opp);
     std::cout << "[GETINFO] Entity Stopped\n";

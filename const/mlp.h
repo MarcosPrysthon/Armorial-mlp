@@ -3,9 +3,9 @@
 
 
 //DEFINES
-#define inLength 8
-#define hidLength 24
-#define outputLength 2
+#define inLength 12
+#define hidLength 36
+#define outputLength 1
 #define learningRate 0.1
 #define mlpThreshold 0.01
 #define lim 0.5	//limite para considerar uma saída como classificada
