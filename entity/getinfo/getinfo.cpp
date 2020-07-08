@@ -274,15 +274,56 @@ void getInfo::fixInfo(){
         kicker = calc(kicker);
         //oppGoalie
         oppGoalie = calc(oppGoalie);
+        if(oppGoalie.position.x() < 0){
+            Position defaultPos(true, 18, 0, 0);
+            oppGoalie.position = defaultPos;
+        }
         //allyGoalie
         allyGoalie = calc(allyGoalie);
+        if(allyGoalie.position.x() > 0){
+            Position defaultPos(true, -18, 0, 0);
+            oppGoalie.position = defaultPos;
+        }
         //ally vector
         for(int i=0; i<qtAlly; i++){
             ally[i] = calc(ally[i]);
+            if(ally[i].position.x() < 0){
+                Position defaultPos(true, -18, 0, 0);
+                ally[i].position = defaultPos;
+            }
         }
         //opp vector
         for(int i=0; i<qtOpp; i++){
             opp[i] = calc(opp[i]);
+            if(opp[i].position.x() < 0){
+                Position defaultPos(true, 18, 0, 0);
+                opp[i].position = defaultPos;
+            }
+        }
+    }else{
+        //se os aliados nao estiverem no lado adversario: posicao default
+        for(int i=0; i<qtAlly; i++){
+            if(ally[i].position.x() < 0){
+                Position defaultPos(true, -18, 0, 0);
+                ally[i].position = defaultPos;
+            }
+        }
+        //se os oponentes nao estiverem na defesa (lado deles): posicao default
+        for(int i=0; i<qtOpp; i++){
+            if(opp[i].position.x() < 0){
+                Position defaultPos(true, 18, 0, 0);
+                opp[i].position = defaultPos;
+            }
+        }
+        //se o goleiro adversario nao for identificado: posicao default
+        if(oppGoalie.position.x() < 0){
+            Position defaultPos(true, 18, 0, 0);
+            oppGoalie.position = defaultPos;
+        }
+        //se o goleiro aliado nao for identificado (nao esta no nosso lado do campo): posicao default
+        if(allyGoalie.position.x() > 0){
+            Position defaultPos(true, -18, 0, 0);
+            oppGoalie.position = defaultPos;
         }
     }
 
