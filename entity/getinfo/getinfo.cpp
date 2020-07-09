@@ -142,14 +142,16 @@ void getInfo::fillInfo(){
     //inicializando informacoes dos jogadores com valores default
     kicker.valid = false;
     kicker.id = 99;
-    kicker.position.setPosition(0, 0, 0);
+    kicker.position.setPosition(-18, 0, 0);
     kicker.orientation.setValue(0);
     allyGoalie = kicker;
     oppGoalie = kicker;
     for(int i = 0; i < MRCConstants::_qtPlayers - 1; i++){
         opp[i] = kicker;
+        opp[i].position.setPosition(18, 0, 0);
         if(i < MRCConstants::_qtPlayers - 2){
             ally[i] = kicker;
+            ally[i].position.setPosition(-18, 0, 0);
         }
     }
     //captando informacoes dos jogadores em campo
