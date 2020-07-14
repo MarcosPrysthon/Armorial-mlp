@@ -17,6 +17,26 @@ public:
     float distToKicker;
 };
 
+class point{
+public:
+    float x, y;
+};
+
+class triangle{
+public:
+    point A, B, C;
+    float AB, BC, CA;
+    float area;
+    void calcSidesAndArea(){
+        float s;
+        AB = sqrt(pow((B.y - A.y), 2) + pow((B.x - A.x), 2));
+        BC = sqrt(pow((C.y - B.y), 2) + pow((C.x - B.x), 2));
+        CA = sqrt(pow((A.y - C.y), 2) + pow((A.x - C.x), 2));
+        s = (AB+BC+CA)/2;
+        area = sqrt(qAbs(s*(s-AB)*(s-BC)*(s-CA)));
+    }
+};
+
 class getInfo : public Entity
 {
 
@@ -39,6 +59,7 @@ private:
     playerInfo kicker, allyGoalie, oppGoalie;
     playerInfo *ally;
     playerInfo *opp;
+    playerInfo *oppObst;
 
     //funcao chamada para captar informacoes, atualizar informacoes dos jogadores e gerar inputLine
     void fillInfo();
@@ -54,6 +75,9 @@ private:
     void fixInfo();
     playerInfo calc(playerInfo player);
 
+    //encontrar jogadores adversarios que estejam entre o kicker e o gol
+    void OppObst();
+
     void Kicker();
     void OppGoalie();
     void AllyGoalie();
@@ -68,7 +92,7 @@ private:
     MRCTeam *_theirTeam;
 
     //VARS
-    int qtAlly, qtOpp;
+    int qtAlly, qtOpp, qtOppObst;
     QMutex teamMutex;
     QMutex playerMutex;
 };

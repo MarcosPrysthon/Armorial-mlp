@@ -2,6 +2,7 @@
 #include <entity/locations.h>
 #include <entity/player/player.h>
 #include <entity/player/playerbus.h>
+#include <utils/freeangles/freeangles.h>
 #include "const/constants.h"
 #include "const/mlp.h"
 #include <string>
@@ -130,6 +131,62 @@ void getInfo::Opp(){
     //std::cout << "[GETINFO] OPP READY" << std::endl;
 }
 
+void getInfo::OppObst(){
+    point kickerPos;
+    kickerPos.x = kicker.position.x();
+    kickerPos.y = kicker.position.y();
+    point goalLeft;
+    goalLeft.x = _theirTeam->loc()->ourGoalLeftPost().x();
+    goalLeft.y = _theirTeam->loc()->ourGoalLeftPost().y();
+    point goalRight;
+    goalRight.x = _theirTeam->loc()->ourGoalRightPost().x();
+    goalRight.y = _theirTeam->loc()->ourGoalRightPost().y();
+
+    triangle T;
+    T.A = kickerPos;
+    T.B = goalLeft;
+    T.C = goalRight;
+    T.calcSidesAndArea();
+
+    qtOppObst = 0;
+    for(int i=0;i<qtOpp;i++){
+        point oppPos;
+        oppPos.x = opp[i].position.x();
+        oppPos.y = opp[i].position.y();
+
+        triangle T1;
+        T1.A = kickerPos;
+        T1.B = goalLeft;
+        T1.C = oppPos;
+        T1.calcSidesAndArea();
+
+        triangle T2;
+        T2.A = kickerPos;
+        T2.B = goalRight;
+        T2.C = oppPos;
+        T2.calcSidesAndArea();
+
+        triangle T3;
+        T3.A = goalLeft;
+        T3.B = goalRight;
+        T3.C = oppPos;
+        T3.calcSidesAndArea();
+
+        //comparando areas (floats)
+        bool oppIsObst;
+        static constexpr auto epsilon = 1.0e-01f;
+        oppIsObst = (qAbs(T.area - (T1.area+T2.area+T3.area)) <= epsilon);
+        if(oppIsObst == false){
+            oppIsObst = qAbs(T.area - (T1.area+T2.area+T3.area)) <= (epsilon * qMax(qAbs(T.area), qAbs(T1.area+T2.area+T3.area)));
+        }
+        //se o oponente estiver entre o kicker e o gol
+        if(oppIsObst){
+            oppObst[qtOppObst] = opp[i];
+            qtOppObst++;
+        }
+    }
+}
+
 void getInfo::fillInfo(){
     //std::cout << std::endl;
 
@@ -138,6 +195,7 @@ void getInfo::fillInfo(){
     //inicializando variaveis
     qtAlly = 0;
     qtOpp = 0;
+    qtOppObst = 0;
     inputLine.clear();
     //inicializando informacoes dos jogadores com valores default
     kicker.valid = false;
@@ -149,6 +207,8 @@ void getInfo::fillInfo(){
     for(int i = 0; i < MRCConstants::_qtPlayers - 1; i++){
         opp[i] = kicker;
         opp[i].position.setPosition(18, 0, 0);
+        oppObst[i] = kicker;
+        oppObst[i].position.setPosition(18, 0, 0);
         if(i < MRCConstants::_qtPlayers - 2){
             ally[i] = kicker;
             ally[i].position.setPosition(-18, 0, 0);
@@ -156,26 +216,62 @@ void getInfo::fillInfo(){
     }
     //captando informacoes dos jogadores em campo
     Kicker();
-    OppGoalie();
-    AllyGoalie();
-    Opp();
-    Ally();
-    teamSort(ally, qtAlly);
-    teamSort(opp, qtOpp);
-    fixInfo();
-    if(kicker.valid) testMLP();
+    if(kicker.valid){
+        OppGoalie();
+        AllyGoalie();
+        Opp();
+        OppObst();
+        Ally();
+        fixInfo();
+        teamSort(ally, qtAlly);
+        teamSort(opp, qtOpp);
+        teamSort(oppObst, qtOppObst);
+        testMLP();
+    }
     //std::cout << std::endl;
 
     playerMutex.unlock();
 }
 
 void getInfo::makeInputLine(){
+    /*
+     * ordem das entradas:
+     * dados do kicker, dados do ally0, dados do ally1, dados do oppGoalie,
+     * dados do opp0(podendo ser o oponente entre o gol e o atacante mais proximo do atacante),
+     * dados do opp1(podendo ser o oponente mais proximo ou o segundo mais proximo do atacante);
+    */
+
+    //kicker
+    inputLine += std::to_string(kicker.position.x()) + " " + std::to_string(kicker.position.y()) + " ";
+    //ally0
+    inputLine += std::to_string(ally[0].position.x()) + " " + std::to_string(ally[0].position.y()) + " ";
+    //ally1
+    inputLine += std::to_string(ally[1].position.x()) + " " + std::to_string(ally[1].position.y()) + " ";
+    //oppGoalie
+    inputLine += std::to_string(oppGoalie.position.x()) + " " + std::to_string(oppGoalie.position.y()) + " ";
+    if(oppObst[0].valid){
+        //oppObst0
+        inputLine += std::to_string(oppObst[0].position.x()) + " " + std::to_string(oppObst[0].position.y()) + " ";
+        if(opp[0].id == oppObst[0].id){
+            //opp1
+            inputLine += std::to_string(opp[1].position.x()) + " " + std::to_string(opp[1].position.y()) + " ";
+        }else{
+            //opp0
+            inputLine += std::to_string(opp[0].position.x()) + " " + std::to_string(opp[0].position.y()) + " ";
+        }
+    }else{
+        //opp0
+        inputLine += std::to_string(opp[0].position.x()) + " " + std::to_string(opp[0].position.y()) + " ";
+        //opp1
+        inputLine += std::to_string(opp[1].position.x()) + " " + std::to_string(opp[1].position.y()) + " ";
+    }
 /*
  * ordem das entradas:
  * dados do kicker, dados do ally0, dados do opp0, dados do oppGoalie,
  * dados do ally1, dados do ally2, dados do ally3, dados do allyGoalie,
  * dados do opp1, dados do opp2, dados do opp3, dados do opp4;
 */
+/*
     //kicker
     inputLine += std::to_string(kicker.position.x()) + " " + std::to_string(kicker.position.y()) + " " + std::to_string(kicker.orientation.value()) + " ";
     //ally0
@@ -202,6 +298,8 @@ void getInfo::makeInputLine(){
     inputLine += std::to_string(opp[4].position.x()) + " " + std::to_string(opp[4].position.y()) + " " + std::to_string(opp[4].orientation.value()) + " ";
 
     //std::cout << "[GETINFO] INPUT LINE READY" << std::endl;
+*/
+
 }
 
 void getInfo::writeOnDataset(std::string output){
@@ -292,6 +390,8 @@ void getInfo::fixInfo(){
             if(ally[i].position.x() < 0){
                 Position defaultPos(true, -18, 0, 0);
                 ally[i].position = defaultPos;
+                //jogadores que estejam atras do meio do campo nao serao considerados
+                ally[i].distToKicker = 100;
             }
         }
         //opp vector
@@ -300,6 +400,19 @@ void getInfo::fixInfo(){
             if(opp[i].position.x() < 0){
                 Position defaultPos(true, 18, 0, 0);
                 opp[i].position = defaultPos;
+                //jogadores que estejam atras do meio do campo nao serao considerados
+                opp[i].distToKicker = 100;
+            }
+        }
+
+        //oppObst vector
+        for(int i=0; i<qtOppObst; i++){
+            oppObst[i] = calc(oppObst[i]);
+            if(oppObst[i].position.x() < 0){
+                Position defaultPos(true, 18, 0, 0);
+                oppObst[i].position = defaultPos;
+                //jogadores que estejam atras do meio do campo nao serao considerados
+                oppObst[i].distToKicker = 100;
             }
         }
     }else{
@@ -308,6 +421,8 @@ void getInfo::fixInfo(){
             if(ally[i].position.x() < 0){
                 Position defaultPos(true, -18, 0, 0);
                 ally[i].position = defaultPos;
+                //jogadores que estejam atras do meio do campo nao serao considerados
+                ally[i].distToKicker = 100;
             }
         }
         //se os oponentes nao estiverem na defesa (lado deles): posicao default
@@ -315,6 +430,17 @@ void getInfo::fixInfo(){
             if(opp[i].position.x() < 0){
                 Position defaultPos(true, 18, 0, 0);
                 opp[i].position = defaultPos;
+                //jogadores que estejam atras do meio do campo nao serao considerados
+                opp[i].distToKicker = 100;
+            }
+        }
+        //oponentes entre kicker e gol adversario
+        for(int i=0; i<qtOppObst; i++){
+            if(oppObst[i].position.x() < 0){
+                Position defaultPos(true, 18, 0, 0);
+                oppObst[i].position = defaultPos;
+                //jogadores que estejam atras do meio do campo nao serao considerados
+                oppObst[i].distToKicker = 100;
             }
         }
         //se o goleiro adversario nao for identificado: posicao default
@@ -356,6 +482,11 @@ void getInfo::initialization(){
     if(opp == NULL){
         std::cout << "[GETINFO] Erro alocacao;" << std::endl;
     }
+    //alocar vetor para guardar informacoes dos jogadores oponentes entre o kicker e o gol
+    oppObst = static_cast<playerInfo*>(malloc((MRCConstants::_qtPlayers - 1)*(sizeof(playerInfo))));
+    if(oppObst == NULL){
+        std::cout << "[GETINFO] Erro alocacao;" << std::endl;
+    }
 
     std::cout << "[GETINFO] Entity Started\n";
 }
@@ -367,6 +498,7 @@ void getInfo::loop(){
 void getInfo::finalization(){
     free(ally);
     free(opp);
+    free(oppObst);
     std::cout << "[GETINFO] Entity Stopped\n";
 }
 
