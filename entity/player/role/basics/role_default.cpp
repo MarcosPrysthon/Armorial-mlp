@@ -1,3 +1,4 @@
+
 /***
  * Maracatronics Robotics
  * Federal University of Pernambuco (UFPE) at Recife
@@ -50,12 +51,12 @@ void Role_Default::run(){
      * set presentes neles)
     */
     setBehaviour(BHV_DONOTHING);
+
     /*
-    if(player()->hasBallPossession()){
+    if(player()->playerId() == 3){
         setBehaviour(BHV_ATTACKER);
-    }else{
+    }else if(player()->playerId() == 2){
         setBehaviour(BHV_RECEIVER);
     }
     */
-
 }
