@@ -226,7 +226,7 @@ void getInfo::fillInfo(){
         teamSort(ally, qtAlly);
         teamSort(opp, qtOpp);
         teamSort(oppObst, qtOppObst);
-        testMLP();
+        //testMLP();
     }
     //std::cout << std::endl;
 
@@ -458,15 +458,52 @@ void getInfo::fixInfo(){
 }
 
 void getInfo::testMLP(){
-    float inMlp[inLength] = {kicker.position.x(), kicker.position.y(), ally[0].position.x(), ally[0].position.y(),
-                     opp[0].position.x(), opp[0].position.y(), oppGoalie.position.x(), oppGoalie.position.y(),
-                     ally[1].position.x(), ally[1].position.y(), opp[1].position.x(), opp[1].position.y()};
-    float* mlpDecision;
-    mlpDecision = MLP::forward(inMlp);
-    cout << "[GETINFO MLP] ";
-    for(int i=0;i<outputLength;i++){
-        cout << mlpDecision[i] << " ";
+    //ajeitar para gerar um vetor com as entradas previamente
+    /*
+     * ordem das entradas:
+     * dados do kicker, dados do ally0, dados do ally1, dados do oppGoalie,
+     * dados do opp0(podendo ser o oponente entre o gol e o atacante mais proximo do atacante),
+     * dados do opp1(podendo ser o oponente mais proximo ou o segundo mais proximo do atacante);
+    */
+    if(oppObst[0].valid){
+        //oppObst0
+        if(opp[0].id == oppObst[0].id){
+            //opp1
+            float inMlp[inLength] = {kicker.position.x(), kicker.position.y(), ally[0].position.x(), ally[0].position.y(),
+                                     ally[1].position.x(), ally[1].position.y(), oppGoalie.position.x(), oppGoalie.position.y(),
+                                     oppObst[0].position.x(), oppObst[0].position.y(), opp[1].position.x(), opp[1].position.y()};
+            float* mlpDecision;
+            mlpDecision = MLP::forward(inMlp);
+            cout << "[GETINFO MLP] ";
+            for(int i=0;i<outputLength;i++){
+                cout << mlpDecision[i] << " ";
+            }
+        }else{
+            //opp0
+            float inMlp[inLength] = {kicker.position.x(), kicker.position.y(), ally[0].position.x(), ally[0].position.y(),
+                                     ally[1].position.x(), ally[1].position.y(), oppGoalie.position.x(), oppGoalie.position.y(),
+                                     oppObst[0].position.x(), oppObst[0].position.y(), opp[0].position.x(), opp[0].position.y()};
+            float* mlpDecision;
+            mlpDecision = MLP::forward(inMlp);
+            cout << "[GETINFO MLP] ";
+            for(int i=0;i<outputLength;i++){
+                cout << mlpDecision[i] << " ";
+            }
+        }
+    }else{
+        //opp0
+        //opp1
+        float inMlp[inLength] = {kicker.position.x(), kicker.position.y(), ally[0].position.x(), ally[0].position.y(),
+                                 ally[1].position.x(), ally[1].position.y(), oppGoalie.position.x(), oppGoalie.position.y(),
+                                 opp[0].position.x(), opp[0].position.y(), opp[1].position.x(), opp[1].position.y()};
+        float* mlpDecision;
+        mlpDecision = MLP::forward(inMlp);
+        cout << "[GETINFO MLP] ";
+        for(int i=0;i<outputLength;i++){
+            cout << mlpDecision[i] << " ";
+        }
     }
+
     cout << endl;
 }
 

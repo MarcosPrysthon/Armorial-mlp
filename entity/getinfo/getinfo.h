@@ -6,7 +6,9 @@
 #include <entity/contromodule/mrcteam.h>
 #include <fstream>
 
-#define datasetPath "entity/getinfo/dataset.txt"
+//path para o arquivo do dataset
+//QString QdatasetPath = QDir().filePath("../entity/getinfo/dataset.txt");
+//std::string datasetPath = QdatasetPath.toUtf8().constData();
 
 class playerInfo{
 public:
@@ -52,6 +54,10 @@ public:
     void writeOnDataset(std::string output);
 
 private:
+    //path para o arquivo do dataset
+    QString QdatasetPath = QDir().filePath("../entity/getinfo/dataset.txt");
+    std::string datasetPath = QdatasetPath.toUtf8().constData();
+
     //arquivo dataset
     std::fstream dataset;
 
