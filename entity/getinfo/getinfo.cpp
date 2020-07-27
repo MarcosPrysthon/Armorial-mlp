@@ -387,7 +387,8 @@ void getInfo::fixInfo(){
         //ally vector
         for(int i=0; i<qtAlly; i++){
             ally[i] = calc(ally[i]);
-            if(ally[i].position.x() < 0){
+            //se o aliado estiver atras do nosso atacante: nao eh relevante para um possivel passe ou possivel chute a gol
+            if(ally[i].position.x() < kicker.position.x()){
                 Position defaultPos(true, -18, 0, 0);
                 ally[i].position = defaultPos;
                 //jogadores que estejam atras do meio do campo nao serao considerados
@@ -397,7 +398,8 @@ void getInfo::fixInfo(){
         //opp vector
         for(int i=0; i<qtOpp; i++){
             opp[i] = calc(opp[i]);
-            if(opp[i].position.x() < 0){
+            //se o oponente estiver atras do nosso atacante ele nao estara bloqueando um chute a gol nem marcando um receptor de passe
+            if(opp[i].position.x() < kicker.position.x()){
                 Position defaultPos(true, 18, 0, 0);
                 opp[i].position = defaultPos;
                 //jogadores que estejam atras do meio do campo nao serao considerados
@@ -408,7 +410,7 @@ void getInfo::fixInfo(){
         //oppObst vector
         for(int i=0; i<qtOppObst; i++){
             oppObst[i] = calc(oppObst[i]);
-            if(oppObst[i].position.x() < 0){
+            if(oppObst[i].position.x() < kicker.position.x()){
                 Position defaultPos(true, 18, 0, 0);
                 oppObst[i].position = defaultPos;
                 //jogadores que estejam atras do meio do campo nao serao considerados
@@ -418,7 +420,8 @@ void getInfo::fixInfo(){
     }else{
         //se os aliados nao estiverem no lado adversario: posicao default
         for(int i=0; i<qtAlly; i++){
-            if(ally[i].position.x() < 0){
+            //se o aliado estiver atras do nosso atacante: nao eh relevante para um possivel passe ou possivel chute a gol
+            if(ally[i].position.x() < kicker.position.x()){
                 Position defaultPos(true, -18, 0, 0);
                 ally[i].position = defaultPos;
                 //jogadores que estejam atras do meio do campo nao serao considerados
@@ -427,7 +430,8 @@ void getInfo::fixInfo(){
         }
         //se os oponentes nao estiverem na defesa (lado deles): posicao default
         for(int i=0; i<qtOpp; i++){
-            if(opp[i].position.x() < 0){
+            //se o oponente estiver atras do nosso atacante ele nao estara bloqueando um chute a gol nem marcando um receptor de passe
+            if(opp[i].position.x() < kicker.position.x()){
                 Position defaultPos(true, 18, 0, 0);
                 opp[i].position = defaultPos;
                 //jogadores que estejam atras do meio do campo nao serao considerados
@@ -436,7 +440,7 @@ void getInfo::fixInfo(){
         }
         //oponentes entre kicker e gol adversario
         for(int i=0; i<qtOppObst; i++){
-            if(oppObst[i].position.x() < 0){
+            if(oppObst[i].position.x() < kicker.position.x()){
                 Position defaultPos(true, 18, 0, 0);
                 oppObst[i].position = defaultPos;
                 //jogadores que estejam atras do meio do campo nao serao considerados

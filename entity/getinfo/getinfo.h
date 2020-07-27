@@ -6,10 +6,6 @@
 #include <entity/contromodule/mrcteam.h>
 #include <fstream>
 
-//path para o arquivo do dataset
-//QString QdatasetPath = QDir().filePath("../entity/getinfo/dataset.txt");
-//std::string datasetPath = QdatasetPath.toUtf8().constData();
-
 class playerInfo{
 public:
     bool valid;
