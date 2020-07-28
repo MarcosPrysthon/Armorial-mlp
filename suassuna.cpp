@@ -37,7 +37,7 @@ Suassuna::Suassuna(quint8 teamId, Colors::Color teamColor, FieldSide fieldSide)
 
     // Create GUI
     _ourGUI = new CoachView();
-    
+
     // Default field setup
     _defaultField = new Fields::SSL2020();
 
@@ -101,7 +101,6 @@ bool Suassuna::start() {
     _ballPred->setMinDataSize(50);
     _ballPred->setMinVelocity(0.3);
     _world->addEntity(_ballPred, 2);
-
 */
     FreeAngles::initialize(_ourTeam, _theirTeam);
 

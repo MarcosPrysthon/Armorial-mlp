@@ -63,6 +63,9 @@ private:
     playerInfo *opp;
     playerInfo *oppObst;
 
+    //funcao usada para detectar se o time mudou de lado do campo
+    void CorrectFieldSide();
+
     //funcao chamada para captar informacoes, atualizar informacoes dos jogadores e gerar inputLine
     void fillInfo();
 

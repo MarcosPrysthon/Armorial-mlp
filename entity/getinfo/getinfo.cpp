@@ -22,6 +22,44 @@ void getInfo::setTeams(MRCTeam *ourTeam, MRCTeam *theirTeam){
     teamMutex.unlock();
 }
 
+void getInfo::CorrectFieldSide(){
+    //bool closestPlayerToOurGoalIsAnOpponent;
+    float minorOppDistToOurGoal = 1000;
+    float minorAllyDistToOurGoal = 1000;
+    quint8 idp = -1;
+
+    for(quint8 id = 0; id < MRCConstants::_qtPlayers; id++){
+        if(PlayerBus::ourPlayerAvailable(id)){  //verifica se o id é valido
+            if(PlayerBus::ourPlayer(id)->distOurGoal() < minorAllyDistToOurGoal){
+                minorAllyDistToOurGoal = PlayerBus::ourPlayer(id)->distOurGoal();
+                idp = id;
+            }
+        }
+        if(PlayerBus::theirPlayerAvailable(id)){
+            if(PlayerBus::theirPlayer(id)->distTheirGoal() < minorOppDistToOurGoal){
+                minorOppDistToOurGoal = PlayerBus::theirPlayer(id)->distTheirGoal();
+            }
+        }
+    }
+    teamMutex.lock();
+    if(minorOppDistToOurGoal < minorAllyDistToOurGoal){
+        if(_ourTeam->fieldSide().isLeft()){
+            _ourTeam->setFieldSide(Sides::RIGHT);
+            _theirTeam->setFieldSide(Sides::LEFT);
+            cout << "CHANGED FROM LEFT TO RIGHT-------------------------------------------" << endl;
+        }else if(_ourTeam->fieldSide().isRight()){
+            _ourTeam->setFieldSide(Sides::LEFT);
+            _theirTeam->setFieldSide(Sides::RIGHT);
+            cout << "CHANGED FROM RIGHT TO LEFT-------------------------------------------" << endl;
+        }else{
+            cout << "TRIED TO CHANGE FIELD SIDE -------------------------------------------" << endl;
+        }
+    }else{
+        cout << "DIDNT CHANGE FIELD SIDE -------------------------------------------" << endl;
+    }
+    teamMutex.unlock();
+}
+
 void getInfo::Kicker(){
     bool foundKicker = false;
     //Determinar o jogador com a bola (kicker)
@@ -214,6 +252,8 @@ void getInfo::fillInfo(){
             ally[i].position.setPosition(-18, 0, 0);
         }
     }
+    //Para mudar o fieldSide caso exista um jogador oponente mais proximo do ourGoal do que qualquer jogador aliado
+    //CorrectFieldSide();
     //captando informacoes dos jogadores em campo
     Kicker();
     if(kicker.valid){

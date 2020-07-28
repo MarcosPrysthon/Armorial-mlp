@@ -34,6 +34,9 @@ MLP::MLP(){
             MLP::matO[i][j] = 2.0f * ((float)rand() / (2.0f * (float)RAND_MAX)) - 0.5f;
         }
     }
+    //path para o arquivo results
+    QString QresultsFilePath = QDir().filePath("../const/mlpfiles/results");
+    std::string resultsFile = QresultsFilePath.toUtf8().constData();
     results.open(resultsFile);
     if(!results.is_open()){
         cout << "error opening results file" << endl;
@@ -45,6 +48,9 @@ MLP::~MLP(){
 }
 
 void MLP::trainMlp(){
+    //path para o arquivo traindataset
+    QString QtrainFilePath = QDir().filePath("../const/mlpfiles/traindataset");
+    std::string trainFile = QtrainFilePath.toUtf8().constData();
     int i, j;
     std::ifstream trainDataset;
     //acessando arquivo contendo dataset
@@ -75,6 +81,9 @@ void MLP::trainMlp(){
 }
 
 void MLP::testMlp(){
+    //path para o arquivo testdataset
+    QString QtestFilePath = QDir().filePath("../const/mlpfiles/testdataset");
+    std::string testFile = QtestFilePath.toUtf8().constData();
     int i, j;
     std::ifstream testDataset;
     //testando MLP
@@ -244,6 +253,9 @@ void MLP::backpropagation(float X[][inLength], float Y[][outputLength], int qtTr
 }
 
 void MLP::saveParameters(){
+    //path para o arquivo parameters
+    QString QparametersFilePath = QDir().filePath("../const/mlpfiles/parameters");
+    std::string parametersFile = QparametersFilePath.toUtf8().constData();
     //atualiza arquivo 'parameters' caso seja obtido um erro menor
     int i, j;
     fstream parameters;
@@ -293,6 +305,9 @@ void MLP::saveParameters(){
 }
 
 void MLP::loadParameters(){
+    //path para o arquivo parameters
+    QString QparametersFilePath = QDir().filePath("../const/mlpfiles/parameters");
+    std::string parametersFile = QparametersFilePath.toUtf8().constData();
     //carrega parametros salvos nas variaveis correspondentes
     int i, j;
     ifstream parameters;

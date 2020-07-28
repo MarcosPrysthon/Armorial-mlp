@@ -10,12 +10,14 @@
 #define mlpThreshold 0.01
 #define lim 0.5	//limite para considerar uma saída como classificada
 #define maxtraincycles 10000
-#define resultsFile "const/mlpfiles/results"
-#define parametersFile "const/mlpfiles/parameters"
-#define trainFile "const/mlpfiles/traindataset"
-#define testFile "const/mlpfiles/testdataset"
+//#define resultsFile "const/mlpfiles/results"
+//#define parametersFile "const/mlpfiles/parameters"
+//#define trainFile "const/mlpfiles/traindataset"
+//#define testFile "const/mlpfiles/testdataset"
 
 #include <fstream>
+#include<QString>
+#include<QDir>
 
 //CLASSES
 class MLP{
