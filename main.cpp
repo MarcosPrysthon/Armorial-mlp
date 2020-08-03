@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
     Competitions::Competition competition = Competitions::SSL;
     quint8 ourTeamId = 0;
     Colors::Color ourTeamColor = Colors::YELLOW;
-    FieldSide ourFieldSide = Sides::RIGHT;
+    FieldSide ourFieldSide = Sides::LEFT;
     bool enableGUI = false;
 
     // Check arguments
